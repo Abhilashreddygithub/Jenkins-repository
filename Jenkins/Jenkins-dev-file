@@ -1,0 +1,37 @@
+pipeline{
+    agent any
+      environment{
+        PATH=/opt/maven/bin:$PATH
+      }
+      stages{
+         stage("git checkout"){
+            steps{
+               git credientialsid: 'Abhilash123', url:'https://github.com/Abhilashreddygithub/Jenkins/new/main'
+             }
+         }      
+         stage("maven build"){
+            steps{
+               sh "mvn clean package" 
+               sh "mv target/*.war  target/webapp*.war"
+              }  
+         }
+          stage("depoloy-dev"){
+            steps{
+               sshagent(['tomcat-new]){                    ----sshagent plugin used to copy war file to tomcat
+               sh """
+                   scp -o StrictHostkeychecking=no target/myweb.war ec2-user@172.31.38.118:/home/ec2-user/apache-tomcat-9.0.46/webapps/
+                   
+                   ssh ec2-user@172.31.38.118 /home/ec2-user/apache-tomcat-9.0.46/bin/shutdown.sh
+                   
+                   ssh ec2-user@172.31.38.118 /home/ec2-user/apache-tomcat-9.0.46/bin/startup.sh
+                   
+                """
+             } 
+             
+             }
+             
+         }
+         
+       }  
+      
+     } 
