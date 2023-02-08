@@ -1,0 +1,41 @@
+pipeline {
+     agent any 
+     environment {
+          DOCKER_TAG = getdockertag()
+          }
+          stage {
+             stages ('built docker image') {
+                steps {
+                  sh 'docker build . -t Adminuser/myimage: ${DOCKER_TAG}
+                }
+             }
+             stages ('docker hub push') {
+                 steps { 
+                    withCredientials ([string(credientialsId:"docker-hub", variable= "dockerhubpwd")]) {
+                          sh "docker login -u Adminuser -p ${dockerhubpwd}"
+                          sh "docker push Adminuser/imagename:${DOCKER_TAG}"
+                          }
+                       }
+                   }
+              stage ("deploy to kuberenets") {
+                 steps {
+                    sh "chmod +x changetag.sh"
+                    sh "./changetag.sh ${DOCKER_TAG}"
+                    sshagent(['kops-machine']) {
+                    sh "scp -o stricthostkeychecking=no services.yaml node-app-pod.yaml ec2-user@62.133.45.86:/home/ec2-user/"
+                    script {
+                       try 
+                         sh "ssh ec2-user@62.133.45.86 kubectl apply -f ."
+                         }
+                       catch(error) {
+                         sh "ssh ec2-user@62.133.45.86 kubectl create -f ."
+                        }
+                     }    
+                  }   
+                          
+
+   
+
+     
+                        
+
