@@ -1,0 +1,22 @@
+apiversion: v1
+kind: repica set
+metadata: 
+    name: nodeapp-rc
+    labels: 
+        app: node-app
+        type: front-end
+spec:
+   templeate:
+        metadata:
+            name: node-pod
+            labels: 
+               app: node-app
+               type: front-end
+        spec:
+          containers:
+               name: nodeapp
+               image:adminuser/nodeapp:v1
+               ports:
+                 container port: 8080
+           
+
