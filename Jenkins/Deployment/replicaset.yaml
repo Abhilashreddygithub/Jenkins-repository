@@ -18,5 +18,6 @@ spec:
                image:adminuser/nodeapp:v1
                ports:
                  container port: 8080
-           
+replicaset: 3
 
+           
